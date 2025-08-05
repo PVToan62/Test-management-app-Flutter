@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "714087397349",
+    "project_id": "test-management-app-ac921",
+    "storage_bucket": "test-management-app-ac921.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:714087397349:android:cb710f3087d8f0b923e10c",
+        "android_client_info": {
+          "package_name": "com.example.test_management_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr-V4Z2jb5Nc-X0RTCTPCknCGAsE2YpBE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
