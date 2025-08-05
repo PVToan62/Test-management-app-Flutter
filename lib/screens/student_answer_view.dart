@@ -220,9 +220,7 @@ class StudentAnswerViewPageState extends State<StudentAnswerViewPage> {
                                 'Câu: $questionNum',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: questionResult.isCorrect
-                                      ? Colors.green[700]
-                                      : Colors.red[700],
+                                  color: Colors.black,
                                   fontSize: 16,
                                 ),
                               ),
