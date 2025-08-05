@@ -59,9 +59,7 @@ class StudentAnswerViewPageState extends State<StudentAnswerViewPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FullScreenImageViewer(
-          imageUrls: codeImageUrls,
-        ),
+        builder: (context) => FullScreenImageViewer(imageUrls: codeImageUrls),
       ),
     );
   }
@@ -79,13 +77,13 @@ class StudentAnswerViewPageState extends State<StudentAnswerViewPage> {
             onPressed: isLoadingImage ? null : _showCodeImage,
             icon: isLoadingImage
                 ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            )
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
                 : const Icon(Icons.image),
             tooltip: 'Xem ảnh mã đề',
           ),
@@ -166,7 +164,7 @@ class StudentAnswerViewPageState extends State<StudentAnswerViewPage> {
                   index,
                 );
                 QuestionResult questionResult =
-                widget.result.details[questionNum]!;
+                    widget.result.details[questionNum]!;
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(
@@ -235,8 +233,8 @@ class StudentAnswerViewPageState extends State<StudentAnswerViewPage> {
                           padding: const EdgeInsets.all(12),
                           child: Wrap(
                             children: ['A', 'B', 'C', 'D', 'E', 'F'].map((
-                                option,
-                                ) {
+                              option,
+                            ) {
                               bool isStudentAnswer = questionResult
                                   .studentAnswer
                                   .split(',')

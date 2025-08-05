@@ -105,60 +105,60 @@ class StudentListPage extends ConsumerWidget {
         centerTitle: true,
         leading: studentState.isSelectionMode
             ? IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => controller.toggleSelectionMode(false),
-        )
+                icon: const Icon(Icons.close),
+                onPressed: () => controller.toggleSelectionMode(false),
+              )
             : Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
         actions: studentState.isSelectionMode
             ? [
-          IconButton(
-            icon: const Icon(Icons.select_all),
-            onPressed: () => controller.selectAll(
-              !studentState.selected.every((isSelected) => isSelected),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => controller.deleteSelected(),
-          ),
-        ]
-            : [
-          PopupMenuButton<String>(
-            onSelected: (choice) {
-              final controller = ref.read(
-                studentListControllerProvider.notifier,
-              );
-              controller.sortStudents(
-                students: controller.state.students,
-                sortBy: choice,
-                onSorted: (sortedStudents) {
-                  controller.setStudents(sortedStudents);
-                },
-              );
-            },
-            icon: Image.asset(
-              'assets/icons/sort.png',
-              width: 24,
-              height: 24,
-              color: Colors.white,
-            ),
-            itemBuilder: (BuildContext context) {
-              return {'mã số', 'tên'}.map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(
-                    'Sắp xếp theo ${choice[0] + choice.substring(1)}',
+                IconButton(
+                  icon: const Icon(Icons.select_all),
+                  onPressed: () => controller.selectAll(
+                    !studentState.selected.every((isSelected) => isSelected),
                   ),
-                );
-              }).toList();
-            },
-          ),
-        ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => controller.deleteSelected(),
+                ),
+              ]
+            : [
+                PopupMenuButton<String>(
+                  onSelected: (choice) {
+                    final controller = ref.read(
+                      studentListControllerProvider.notifier,
+                    );
+                    controller.sortStudents(
+                      students: controller.state.students,
+                      sortBy: choice,
+                      onSorted: (sortedStudents) {
+                        controller.setStudents(sortedStudents);
+                      },
+                    );
+                  },
+                  icon: Image.asset(
+                    'assets/icons/sort.png',
+                    width: 24,
+                    height: 24,
+                    color: Colors.white,
+                  ),
+                  itemBuilder: (BuildContext context) {
+                    return {'mã số', 'tên'}.map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(
+                          'Sắp xếp theo ${choice[0] + choice.substring(1)}',
+                        ),
+                      );
+                    }).toList();
+                  },
+                ),
+              ],
       ),
       body: Column(
         children: [
@@ -169,15 +169,19 @@ class StudentListPage extends ConsumerWidget {
                   DataColumn(
                     label: Text('Mã số', style: TextStyle(fontSize: 20)),
                   ),
-                  DataColumn(label: Text('Tên', style: TextStyle(fontSize: 20))),
+                  DataColumn(
+                    label: Text('Tên', style: TextStyle(fontSize: 20)),
+                  ),
                 ],
                 rows: List<DataRow>.generate(studentState.students.length, (
-                    index,
-                    ) {
-                  final studentDetails = studentState.students[index].split('_');
+                  index,
+                ) {
+                  final studentDetails = studentState.students[index].split(
+                    '_',
+                  );
                   return DataRow(
                     selected:
-                    studentState.isSelectionMode &&
+                        studentState.isSelectionMode &&
                         studentState.selected[index],
                     onSelectChanged: studentState.isSelectionMode
                         ? (isSelected) => controller.toggleSelectStudent(index)
@@ -310,7 +314,7 @@ class _AddStudentFormState extends ConsumerState<AddStudentForm> {
   Widget build(BuildContext context) {
     final bool isButtonEnabled =
         _idController.text.trim().isNotEmpty &&
-            _nameController.text.trim().isNotEmpty;
+        _nameController.text.trim().isNotEmpty;
 
     return Padding(
       padding: EdgeInsets.only(

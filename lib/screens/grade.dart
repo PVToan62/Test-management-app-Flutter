@@ -4,12 +4,7 @@ import 'package:flutter/material.dart';
 import '../services/student_submission_service.dart';
 import 'student_answer_view.dart';
 
-enum SortType {
-  studentId,
-  studentName,
-  code,
-  score,
-}
+enum SortType { studentId, studentName, code, score }
 
 class GradePage extends StatefulWidget {
   final String testKey;
@@ -78,10 +73,10 @@ class GradePageState extends State<GradePage> {
 
     for (String code in availableCodes) {
       final submissionList =
-      await StudentSubmissionService.getSubmittedStudents(
-        testId: testId,
-        code: code,
-      );
+          await StudentSubmissionService.getSubmittedStudents(
+            testId: testId,
+            code: code,
+          );
       allSubmissions.addAll(submissionList);
     }
 
@@ -97,8 +92,8 @@ class GradePageState extends State<GradePage> {
   }
 
   Future<void> _autoGradeAllStudents(
-      List<StudentSubmission> submissionList,
-      ) async {
+    List<StudentSubmission> submissionList,
+  ) async {
     for (StudentSubmission submission in submissionList) {
       GradingResult? result = await StudentSubmissionService.gradeStudentTest(
         testId: testId,
@@ -199,11 +194,7 @@ class GradePageState extends State<GradePage> {
                 color: Colors.blue,
               )
             else
-              const Icon(
-                Icons.unfold_more,
-                size: 16,
-                color: Colors.grey,
-              ),
+              const Icon(Icons.unfold_more, size: 16, color: Colors.grey),
           ],
         ),
       ),
@@ -231,22 +222,22 @@ class GradePageState extends State<GradePage> {
           Expanded(
             child: isLoading
                 ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Đang cập nhật điểm...'),
-                ],
-              ),
-            )
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Đang cập nhật điểm...'),
+                      ],
+                    ),
+                  )
                 : submissions.isEmpty
                 ? const Center(
-              child: Text(
-                'Chưa có học sinh nào nộp bài',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            )
+                    child: Text(
+                      'Chưa có học sinh nào nộp bài',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
                 : _buildStudentTable(),
           ),
         ],
@@ -266,7 +257,10 @@ class GradePageState extends State<GradePage> {
               label: _buildSortableColumnHeader('Mã số', SortType.studentId),
             ),
             DataColumn(
-              label: _buildSortableColumnHeader('Họ và tên', SortType.studentName),
+              label: _buildSortableColumnHeader(
+                'Họ và tên',
+                SortType.studentName,
+              ),
             ),
             DataColumn(
               label: _buildSortableColumnHeader('Mã đề', SortType.code),
@@ -308,52 +302,50 @@ class GradePageState extends State<GradePage> {
                     submission.code,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
                     ),
                   ),
                 ),
                 DataCell(
                   result != null
                       ? Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getScoreColor(result.score),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${result.score.toStringAsFixed(1)}/10',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getScoreColor(result.score),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${result.score.toStringAsFixed(1)}/10',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
                       : const Text(
-                    'Chưa chấm',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
+                          'Chưa chấm',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
                 ),
                 DataCell(
                   result != null
                       ? IconButton(
-                    onPressed: () => _showDetailedAnswers(result, testId),
-                    icon: const Icon(Icons.visibility),
-                    color: Colors.blue,
-                    tooltip: 'Xem bài làm chi tiết',
-                  )
+                          onPressed: () => _showDetailedAnswers(result, testId),
+                          icon: const Icon(Icons.visibility),
+                          tooltip: 'Xem bài làm chi tiết',
+                        )
                       : const Text(
-                    'Đang chấm...',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
+                          'Đang chấm...',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
                 ),
               ],
             );
@@ -374,7 +366,8 @@ class GradePageState extends State<GradePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => StudentAnswerViewPage(result: result, testId: testId),
+        builder: (context) =>
+            StudentAnswerViewPage(result: result, testId: testId),
       ),
     );
   }

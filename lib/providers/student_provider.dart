@@ -134,7 +134,7 @@ class StudentListController extends StateNotifier<StudentListState> {
                 } else {
                   showToast(
                     message:
-                    'Học sinh có mã số "$id" đã tồn tại và sẽ bị bỏ qua.',
+                        'Học sinh có mã số "$id" đã tồn tại và sẽ bị bỏ qua.',
                   );
                 }
               }

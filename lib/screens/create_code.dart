@@ -16,7 +16,11 @@ class CreateCodePage extends StatefulWidget {
   final String test;
   final int numberOfQuestions;
 
-  const CreateCodePage({super.key, required this.test, required this.numberOfQuestions});
+  const CreateCodePage({
+    super.key,
+    required this.test,
+    required this.numberOfQuestions,
+  });
 
   @override
   CreateCodePageState createState() => CreateCodePageState();
@@ -260,7 +264,7 @@ class CreateCodePageState extends State<CreateCodePage> {
                 answerHeader == 'Đáp án')) {
               showToast(
                 message:
-                'Tệp Excel phải có tiêu đề "Mã đề", "Câu" và "Đáp án".',
+                    'Tệp Excel phải có tiêu đề "Mã đề", "Câu" và "Đáp án".',
               );
               return;
             }
@@ -271,7 +275,7 @@ class CreateCodePageState extends State<CreateCodePage> {
                 String question = row[1]?.value?.toString() ?? '';
                 String answer = row[2]?.value?.toString() ?? '';
                 if (codes.any(
-                      (existingCode) => existingCode.startsWith(code),
+                  (existingCode) => existingCode.startsWith(code),
                 )) {
                   continue;
                 }
@@ -280,7 +284,7 @@ class CreateCodePageState extends State<CreateCodePage> {
                 }
                 answers[code]![question] = answer;
                 if (!newCodes.any(
-                      (existingCode) => existingCode.startsWith(code),
+                  (existingCode) => existingCode.startsWith(code),
                 )) {
                   newCodes.add(code);
                 }
@@ -457,7 +461,11 @@ class AddCodeForm extends StatefulWidget {
   final Function(String) onSubmit;
   final List<String> existingCodes;
 
-  const AddCodeForm({super.key, required this.onSubmit, required this.existingCodes});
+  const AddCodeForm({
+    super.key,
+    required this.onSubmit,
+    required this.existingCodes,
+  });
 
   @override
   State<AddCodeForm> createState() => _AddCodeFormState();

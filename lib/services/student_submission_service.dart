@@ -26,12 +26,14 @@ class StudentSubmissionService {
         answersFormatted[key.toString()] = value;
       });
 
-      print('Submitting for testId: $testId, code: $code, studentId: $studentId');
+      print(
+        'Submitting for testId: $testId, code: $code, studentId: $studentId',
+      );
 
       List<dynamic> newStudentEntry = [
         studentId,
         studentName,
-        answersFormatted
+        answersFormatted,
       ];
 
       final response = await supabase
@@ -94,7 +96,6 @@ class StudentSubmissionService {
 
       showToast(message: 'Nộp bài thành công!');
       return true;
-
     } on PostgrestException catch (e) {
       print('Supabase error: ${e.message}');
       print('Error code: ${e.code}');
@@ -165,10 +166,13 @@ class StudentSubmissionService {
         return null;
       }
 
-      Map<String, String> correctAnswers =
-      Map<String, String>.from(response['answers'] ?? {});
+      Map<String, String> correctAnswers = Map<String, String>.from(
+        response['answers'] ?? {},
+      );
 
-      List<dynamic> studentsAns = List<dynamic>.from(response['students_ans'] ?? []);
+      List<dynamic> studentsAns = List<dynamic>.from(
+        response['students_ans'] ?? [],
+      );
       Map<String, String>? studentAnswers;
       String? studentName;
 
@@ -194,17 +198,21 @@ class StudentSubmissionService {
       correctAnswers.forEach((questionNum, correctAnswer) {
         String studentAnswer = studentAnswers![questionNum] ?? '';
 
-        List<String> studentOptions = studentAnswer
-            .split(',')
-            .map((s) => s.trim().toUpperCase())
-            .where((s) => s.isNotEmpty)
-            .toList()..sort();
+        List<String> studentOptions =
+            studentAnswer
+                .split(',')
+                .map((s) => s.trim().toUpperCase())
+                .where((s) => s.isNotEmpty)
+                .toList()
+              ..sort();
 
-        List<String> correctOptions = correctAnswer
-            .split(',')
-            .map((s) => s.trim().toUpperCase())
-            .where((s) => s.isNotEmpty)
-            .toList()..sort();
+        List<String> correctOptions =
+            correctAnswer
+                .split(',')
+                .map((s) => s.trim().toUpperCase())
+                .where((s) => s.isNotEmpty)
+                .toList()
+              ..sort();
 
         bool isCorrect = _listEquals(studentOptions, correctOptions);
 
@@ -220,7 +228,9 @@ class StudentSubmissionService {
         );
       });
 
-      double score = totalQuestions > 0 ? (correctCount / totalQuestions) * 10 : 0.0;
+      double score = totalQuestions > 0
+          ? (correctCount / totalQuestions) * 10
+          : 0.0;
 
       GradingResult result = GradingResult(
         studentId: studentId,
@@ -233,9 +243,10 @@ class StudentSubmissionService {
         details: details,
       );
 
-      showToast(message: 'Chấm điểm thành công! Điểm: ${score.toStringAsFixed(2)}/10');
+      showToast(
+        message: 'Chấm điểm thành công! Điểm: ${score.toStringAsFixed(2)}/10',
+      );
       return result;
-
     } catch (e) {
       print('Error grading student test: $e');
       showToast(message: 'Lỗi khi chấm điểm: $e');
@@ -264,18 +275,19 @@ class StudentSubmissionService {
 
       for (var studentEntry in studentsAns) {
         if (studentEntry is List && studentEntry.length >= 3) {
-          submissions.add(StudentSubmission(
-            studentId: studentEntry[0].toString(),
-            studentName: studentEntry[1].toString(),
-            testId: testId,
-            code: code,
-            answers: Map<String, String>.from(studentEntry[2] ?? {}),
-          ));
+          submissions.add(
+            StudentSubmission(
+              studentId: studentEntry[0].toString(),
+              studentName: studentEntry[1].toString(),
+              testId: testId,
+              code: code,
+              answers: Map<String, String>.from(studentEntry[2] ?? {}),
+            ),
+          );
         }
       }
 
       return submissions;
-
     } catch (e) {
       print('Error getting submitted students: $e');
       return [];
@@ -334,7 +346,8 @@ class GradingResult {
     required this.details,
   });
 
-  double get percentage => totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0.0;
+  double get percentage =>
+      totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0.0;
 
   String get grade {
     if (score >= 9.0) return 'A+';

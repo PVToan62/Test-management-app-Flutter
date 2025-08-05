@@ -100,25 +100,105 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Future<String> getTestStatus(String testId) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    bool submitted = prefs.getBool('test_submitted_$testId') ?? false;
-    if (submitted) {
-      return 'submitted';
-    }
-
-    bool hasStartTime = prefs.containsKey('test_start_time-$testId');
-
-    if (hasStartTime) {
-      return 'doing';
-    }
-
-    return 'not_done_yet';
+  AppBar _buildAppBar(
+    bool isSelectionMode,
+    List<bool> selectedItems,
+    List tests,
+    WidgetRef ref,
+  ) {
+    return AppBar(
+      backgroundColor: Colors.blueGrey,
+      foregroundColor: Colors.white,
+      title: const Text('Quản lý bài kiểm tra'),
+      centerTitle: true,
+      leading: _buildLeading(isSelectionMode, ref),
+      actions: _buildActions(isSelectionMode, selectedItems, tests, ref),
+      bottom: const TabBar(
+        indicatorColor: Colors.green,
+        tabs: [
+          Tab(
+            child: Text(
+              'GIÁO VIÊN',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+          Tab(
+            child: Text(
+              'HỌC SINH',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  void refreshTestStatus() {
-    refreshNotifier.value++;
+  Widget _buildLeading(bool isSelectionMode, WidgetRef ref) {
+    return isSelectionMode
+        ? IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              ref.read(selectionModeProvider.notifier).state = false;
+              ref.read(selectedItemsProvider.notifier).clear();
+            },
+          )
+        : Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          );
+  }
+
+  List<Widget> _buildActions(
+    bool isSelectionMode,
+    List<bool> selectedItems,
+    List tests,
+    WidgetRef ref,
+  ) {
+    if (isSelectionMode) {
+      return [
+        IconButton(
+          icon: const Icon(Icons.select_all),
+          onPressed: () {
+            final allSelected = selectedItems.every((isSel) => isSel);
+            ref.read(selectedItemsProvider.notifier).selectAll(!allSelected);
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: () {
+            ref
+                .read(teacherUserProvider.notifier)
+                .deleteSelectedTests(selectedItems);
+            ref.read(selectionModeProvider.notifier).state = false;
+            ref.read(selectedItemsProvider.notifier).clear();
+          },
+        ),
+      ];
+    } else {
+      return [
+        PopupMenuButton<String>(
+          onSelected: (String criteria) {
+            ref.read(teacherUserProvider.notifier).sortTestsTeacher(criteria);
+          },
+          icon: Image.asset(
+            'assets/icons/sort.png',
+            width: 24,
+            height: 24,
+            color: Colors.white,
+          ),
+          itemBuilder: (BuildContext context) {
+            return {'lớp', 'môn học', 'ngày tạo'}.map((choice) {
+              return PopupMenuItem<String>(
+                value: choice,
+                child: Text('Sắp xếp theo ${choice[0]}${choice.substring(1)}'),
+              );
+            }).toList();
+          },
+        ),
+      ];
+    }
   }
 
   Widget _buildTeacherTab() {
@@ -127,7 +207,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     final isSelectionMode = ref.watch(selectionModeProvider);
     final selectedItems = ref.watch(selectedItemsProvider);
 
-    // Đảm bảo selectedItems có đúng độ dài
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (selectedItems.length != tests.length) {
         ref.read(selectedItemsProvider.notifier).initialize(tests.length);
@@ -141,7 +220,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: tests.isEmpty
               ? const Center(
                   child: Text(
-                    'Chưa có bài kiểm tra nào.\nHãy tạo bài kiểm tra đầu tiên!',
+                    'Chưa có bài kiểm tra nào',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
@@ -153,7 +232,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                     final teacherTest = tests[index].split('_');
                     if (teacherTest.length < 6) {
-                      return const SizedBox.shrink(); // Skip malformed entries
+                      return const SizedBox.shrink();
                     }
 
                     final subject = teacherTest[0];
@@ -163,7 +242,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                     final createTime = teacherTest[4];
                     final testId = teacherTest[5];
 
-                    // Đảm bảo selectedItems có index hợp lệ
                     final isSelected = index < selectedItems.length
                         ? selectedItems[index]
                         : false;
@@ -265,6 +343,27 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+  Future<String> getTestStatus(String testId) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    bool submitted = prefs.getBool('test_submitted_$testId') ?? false;
+    if (submitted) {
+      return 'submitted';
+    }
+
+    bool hasStartTime = prefs.containsKey('test_start_time-$testId');
+
+    if (hasStartTime) {
+      return 'doing';
+    }
+
+    return 'not_done_yet';
+  }
+
+  void refreshTestStatus() {
+    refreshNotifier.value++;
+  }
+
   Widget _buildStudentTab() {
     final isSelectionMode = ref.watch(selectionModeProvider);
     return Stack(
@@ -302,7 +401,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         Positioned(
           bottom: 16,
           right: 16,
-          child: _buildStudentDownloadButton(isSelectionMode),
+          child: _buildGetTestButton(isSelectionMode),
         ),
       ],
     );
@@ -349,7 +448,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
               Text(
                 'Số câu: ${test.questionCount} | Thời gian: ${test.duration} phút',
               ),
@@ -357,7 +455,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                 test.testId,
                 style: const TextStyle(color: Colors.red, fontSize: 18),
               ),
-              const SizedBox(height: 8),
               Chip(
                 label: Text(
                   statusText,
@@ -510,7 +607,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildStudentDownloadButton(bool isSelectionMode) {
+  Widget _buildGetTestButton(bool isSelectionMode) {
     return FloatingActionButton(
       onPressed: isSelectionMode
           ? null
@@ -527,108 +624,6 @@ class _HomePageState extends ConsumerState<HomePage> {
       backgroundColor: isSelectionMode ? Colors.grey : Colors.teal,
       child: const Icon(Icons.file_download, color: Colors.white),
     );
-  }
-
-  AppBar _buildAppBar(
-    bool isSelectionMode,
-    List<bool> selectedItems,
-    List tests,
-    WidgetRef ref,
-  ) {
-    return AppBar(
-      backgroundColor: Colors.blueGrey,
-      foregroundColor: Colors.white,
-      title: const Text('Quản lý bài kiểm tra'),
-      centerTitle: true,
-      leading: _buildLeading(isSelectionMode, ref),
-      actions: _buildActions(isSelectionMode, selectedItems, tests, ref),
-      bottom: const TabBar(
-        indicatorColor: Colors.green,
-        tabs: [
-          Tab(
-            child: Text(
-              'GIÁO VIÊN',
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          ),
-          Tab(
-            child: Text(
-              'HỌC SINH',
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Hàm xây dựng leading cho AppBar
-  Widget _buildLeading(bool isSelectionMode, WidgetRef ref) {
-    return isSelectionMode
-        ? IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              ref.read(selectionModeProvider.notifier).state = false;
-              ref.read(selectedItemsProvider.notifier).clear();
-            },
-          )
-        : Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          );
-  }
-
-  List<Widget> _buildActions(
-    bool isSelectionMode,
-    List<bool> selectedItems,
-    List tests,
-    WidgetRef ref,
-  ) {
-    if (isSelectionMode) {
-      return [
-        IconButton(
-          icon: const Icon(Icons.select_all),
-          onPressed: () {
-            final allSelected = selectedItems.every((isSel) => isSel);
-            ref.read(selectedItemsProvider.notifier).selectAll(!allSelected);
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () {
-            ref
-                .read(teacherUserProvider.notifier)
-                .deleteSelectedTests(selectedItems);
-            ref.read(selectionModeProvider.notifier).state = false;
-            ref.read(selectedItemsProvider.notifier).clear();
-          },
-        ),
-      ];
-    } else {
-      return [
-        PopupMenuButton<String>(
-          onSelected: (String criteria) {
-            ref.read(teacherUserProvider.notifier).sortTestsTeacher(criteria);
-          },
-          icon: Image.asset(
-            'assets/icons/sort.png',
-            width: 24,
-            height: 24,
-            color: Colors.white,
-          ),
-          itemBuilder: (BuildContext context) {
-            return {'lớp', 'môn học', 'ngày tạo'}.map((choice) {
-              return PopupMenuItem<String>(
-                value: choice,
-                child: Text('Sắp xếp theo ${choice[0]}${choice.substring(1)}'),
-              );
-            }).toList();
-          },
-        ),
-      ];
-    }
   }
 
   @override

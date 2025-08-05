@@ -31,7 +31,9 @@ class _GetTestFormState extends ConsumerState<GetTestForm> {
 
   void _validateForm() {
     String testId = _testIdController.text.trim();
-    bool isExist = widget.existingTestIds.any((existingId) => existingId == testId);
+    bool isExist = widget.existingTestIds.any(
+      (existingId) => existingId == testId,
+    );
 
     if (isExist) {
       _errorText = 'Bài kiểm tra đã tồn tại!';
@@ -47,7 +49,9 @@ class _GetTestFormState extends ConsumerState<GetTestForm> {
     });
 
     if (_errorText == null) {
-      final String? remoteError = await widget.onSubmit(_testIdController.text.trim());
+      final String? remoteError = await widget.onSubmit(
+        _testIdController.text.trim(),
+      );
 
       setState(() {
         if (remoteError != null) {

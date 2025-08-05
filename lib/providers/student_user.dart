@@ -12,8 +12,8 @@ import '../providers/student_test_provider.dart';
 import '../utils/dialog_utils.dart';
 
 final studentUserProvider = StateNotifierProvider<StudentUser, List<String>>((
-    ref,
-    ) {
+  ref,
+) {
   return StudentUser(ref);
 });
 
@@ -33,7 +33,10 @@ class StudentUser extends StateNotifier<List<String>> {
     required BuildContext context,
     required void Function({required String message}) showToast,
   }) {
-    final existingTestIds = ref.read(studentTestsProvider).map((test) => test.testId).toList();
+    final existingTestIds = ref
+        .read(studentTestsProvider)
+        .map((test) => test.testId)
+        .toList();
 
     showModalBottomSheet(
       context: context,
