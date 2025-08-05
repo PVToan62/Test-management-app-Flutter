@@ -1,5 +1,6 @@
 // lib/providers/student_user.dart
 
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,7 +63,7 @@ class StudentUser extends StateNotifier<List<String>> {
     required String testId,
     required void Function({required String message}) showToast,
   }) async {
-    showLoadingDialog(); // Hiển thị loading overlay
+    showLoadingDialog();
 
     try {
       final response = await Supabase.instance.client
@@ -72,7 +73,7 @@ class StudentUser extends StateNotifier<List<String>> {
 
       final List data = response;
 
-      hideLoadingDialog(); // Ẩn loading overlay sau khi có kết quả
+      hideLoadingDialog();
 
       if (data.isNotEmpty) {
         final random = Random();
@@ -116,6 +117,9 @@ class StudentUser extends StateNotifier<List<String>> {
       } else {
         return 'Không tìm thấy bài kiểm tra';
       }
+    } on SocketException catch (_) {
+      hideLoadingDialog();
+      return 'Không có kết nối mạng. Vui lòng kiểm tra lại.';
     } catch (e) {
       hideLoadingDialog();
       return 'Lỗi: $e';

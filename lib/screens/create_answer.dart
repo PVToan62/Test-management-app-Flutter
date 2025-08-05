@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_management_app/screens/create_code.dart';
 import '../widgets/toast.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -144,6 +145,7 @@ class CreateAnswerPageState extends State<CreateAnswerPage> {
                     _updateGlobalAnswers();
                     _saveImage();
                     Navigator.of(context).pop();
+                    Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
@@ -156,6 +158,7 @@ class CreateAnswerPageState extends State<CreateAnswerPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    Navigator.of(context).pop();
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(

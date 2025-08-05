@@ -126,88 +126,96 @@ class TeacherUser extends StateNotifier<List<String>> {
 
     showLoadingDialog();
 
-    List<String>? savedCodes = prefs.getStringList('codes_$testKey');
-    if (savedCodes == null || savedCodes.isEmpty) {
-      hideLoadingDialog();
-      showToast(message: 'Không tìm thấy mã đề!');
-      return;
-    }
+    try {
+      List<String>? savedCodes = prefs.getStringList('codes_$testKey');
+      if (savedCodes == null || savedCodes.isEmpty) {
+        hideLoadingDialog();
+        showToast(message: 'Không tìm thấy mã đề!');
+        return;
+      }
 
-    String? answersJson = prefs.getString('answers_$testKey');
-    if (answersJson == null) {
-      hideLoadingDialog();
-      showToast(message: 'Không tìm thấy đáp án!');
-      return;
-    }
+      String? answersJson = prefs.getString('answers_$testKey');
+      if (answersJson == null) {
+        hideLoadingDialog();
+        showToast(message: 'Không tìm thấy đáp án!');
+        return;
+      }
 
-    Map<String, Map<String, String>> answersMap =
-        Map<String, Map<String, String>>.from(
-          jsonDecode(
-            answersJson,
-          ).map((key, value) => MapEntry(key, Map<String, String>.from(value))),
-        );
+      Map<String, Map<String, String>> answersMap =
+      Map<String, Map<String, String>>.from(
+        jsonDecode(
+          answersJson,
+        ).map((key, value) => MapEntry(key, Map<String, String>.from(value))),
+      );
 
-    for (String code in savedCodes) {
-      final answerMap = answersMap[code];
+      for (String code in savedCodes) {
+        final answerMap = answersMap[code];
 
-      if (answerMap == null) {
-        if (context.mounted) {
-          showToast(message: 'Bỏ qua mã đề $code vì không tìm thấy đáp án.');
+        if (answerMap == null) {
+          if (context.mounted) {
+            showToast(message: 'Bỏ qua mã đề $code vì không tìm thấy đáp án.');
+          }
+          continue;
         }
-        continue;
-      }
 
-      final hasRealAnswers = answerMap.values.any((a) => a.trim().isNotEmpty);
-      if (!hasRealAnswers) {
-        if (context.mounted) {
-          showToast(message: 'Bỏ qua mã đề $code vì chưa có đáp án.');
+        final hasRealAnswers = answerMap.values.any((a) => a.trim().isNotEmpty);
+        if (!hasRealAnswers) {
+          if (context.mounted) {
+            showToast(message: 'Bỏ qua mã đề $code vì chưa có đáp án.');
+          }
+          continue;
         }
-        continue;
+
+        final imageKey = '${testKey}_${code}_images';
+        List<String> imagePaths = prefs.getStringList(imageKey) ?? [];
+        List<String> imageUrls = [];
+
+        for (String path in imagePaths) {
+          final file = File(path);
+          final fileName = path.split('/').last;
+          final storagePath = '$testId/$code/$fileName';
+
+          await supabase.storage
+              .from('test-images')
+              .upload(
+            storagePath,
+            file,
+            fileOptions: const FileOptions(upsert: true),
+          );
+
+          final publicUrl = supabase.storage
+              .from('test-images')
+              .getPublicUrl(storagePath);
+          imageUrls.add(publicUrl);
+        }
+
+        await supabase.from('test_management_app').upsert({
+          'tests': '${clazz}_$subject',
+          'test_id': testId,
+          'questions': int.parse(questions),
+          'duration': int.parse(duration),
+          'created_at': createTime,
+          'published_at': DateTime.now().toIso8601String(),
+          'codes': code,
+          'answers': answerMap,
+          'image_urls': imageUrls,
+        });
       }
 
-      final imageKey = '${testKey}_${code}_images';
-      List<String> imagePaths = prefs.getStringList(imageKey) ?? [];
-      List<String> imageUrls = [];
+      hideLoadingDialog();
+      showToast(message: 'Phát bài thành công!');
 
-      for (String path in imagePaths) {
-        final file = File(path);
-        final fileName = path.split('/').last;
-        final storagePath = '$testId/$code/$fileName';
-
-        await supabase.storage
-            .from('test-images')
-            .upload(
-              storagePath,
-              file,
-              fileOptions: const FileOptions(upsert: true),
-            );
-
-        final publicUrl = supabase.storage
-            .from('test-images')
-            .getPublicUrl(storagePath);
-        imageUrls.add(publicUrl);
+      List<String> publishedTests = prefs.getStringList('published_tests') ?? [];
+      if (!publishedTests.contains(testId)) {
+        publishedTests.add(testId);
+        await prefs.setStringList('published_tests', publishedTests);
       }
-
-      await supabase.from('test_management_app').upsert({
-        'tests': '${clazz}_$subject',
-        'test_id': testId,
-        'questions': int.parse(questions),
-        'duration': int.parse(duration),
-        'created_at': createTime,
-        'published_at': DateTime.now().toIso8601String(),
-        'codes': code,
-        'answers': answerMap,
-        'image_urls': imageUrls,
-      });
-    }
-
-    hideLoadingDialog();
-    showToast(message: 'Phát bài thành công!');
-
-    List<String> publishedTests = prefs.getStringList('published_tests') ?? [];
-    if (!publishedTests.contains(testId)) {
-      publishedTests.add(testId);
-      await prefs.setStringList('published_tests', publishedTests);
+    } on SocketException catch (_) {
+      hideLoadingDialog();
+      showToast(message: 'Không có kết nối mạng. Vui lòng kiểm tra lại.');
+    } catch (e) {
+      hideLoadingDialog();
+      showToast(message: 'Đã xảy ra lỗi: $e');
     }
   }
 }
