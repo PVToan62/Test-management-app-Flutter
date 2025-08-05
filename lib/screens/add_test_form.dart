@@ -91,7 +91,6 @@ class _AddTestFormState extends State<AddTestForm> {
       'HH:mm dd/MM/yyyy',
     ).format(DateTime.now());
 
-    // Gọi callback
     await Future.delayed(Duration.zero);
 
     widget.onSubmit(subject, clazz, questions, duration, createTime, testId);

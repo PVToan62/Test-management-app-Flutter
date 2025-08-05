@@ -159,7 +159,7 @@ class StudentSubmissionService {
           .select('answers, students_ans')
           .eq('test_id', testId)
           .eq('codes', code)
-          .maybeSingle(); // Thay đổi từ single() sang maybeSingle()
+          .maybeSingle();
 
       if (response == null) {
         showToast(message: 'Không tìm thấy bài kiểm tra');
@@ -264,7 +264,7 @@ class StudentSubmissionService {
           .select('students_ans')
           .eq('test_id', testId)
           .eq('codes', code)
-          .maybeSingle(); // Thay đổi từ single() sang maybeSingle()
+          .maybeSingle();
 
       if (response == null || response['students_ans'] == null) {
         return [];
