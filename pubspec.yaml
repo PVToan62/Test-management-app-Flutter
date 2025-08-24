@@ -88,6 +88,7 @@ flutter:
     - assets/icons/sort.png
     - assets/images/structure_of_the_excel_file_addStudent.png
     - assets/images/structure_of_the_excel_file_addStudent.png
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

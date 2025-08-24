@@ -51,8 +51,6 @@ class TestTakingPageState extends State<TestTakingPage> {
   late String testStatus;
 
   bool isSubmitting = false;
-  String? studentId;
-  String? studentName;
 
   static const String answersKeyPrefix = 'test_answers_';
 

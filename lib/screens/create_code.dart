@@ -70,15 +70,8 @@ class CreateCodePageState extends State<CreateCodePage> {
             onSubmit: (String code) {
               setState(() {
                 codes.add(code);
-                if (!answers.containsKey(code)) {
-                  answers[code] = {};
-                }
-                for (int i = 1; i <= widget.numberOfQuestions; i++) {
-                  answers[code]![i.toString()] = '';
-                }
               });
               _saveCode();
-              _saveAnswers();
               Navigator.pop(context);
               showToast(message: 'Đã thêm mã đề thành công!');
               _loadCode();
@@ -244,15 +237,14 @@ class CreateCodePageState extends State<CreateCodePage> {
       type: FileType.custom,
       allowedExtensions: ['xlsx'],
     );
-
     if (!mounted) return;
-
     if (result != null) {
       final file = result.files.single.path;
       if (file != null) {
         final bytes = File(file).readAsBytesSync();
         final excel = Excel.decodeBytes(bytes);
         List<String> newCodes = [];
+        Map<String, Map<String, String>> importedAnswers = {};
         for (var table in excel.tables.keys) {
           var rows = excel.tables[table]!.rows;
           if (rows.isNotEmpty) {
@@ -264,7 +256,7 @@ class CreateCodePageState extends State<CreateCodePage> {
                 answerHeader == 'Đáp án')) {
               showToast(
                 message:
-                    'Tệp Excel phải có tiêu đề "Mã đề", "Câu" và "Đáp án".',
+                'Tệp Excel phải có tiêu đề "Mã đề", "Câu" và "Đáp án".',
               );
               return;
             }
@@ -275,16 +267,18 @@ class CreateCodePageState extends State<CreateCodePage> {
                 String question = row[1]?.value?.toString() ?? '';
                 String answer = row[2]?.value?.toString() ?? '';
                 if (codes.any(
-                  (existingCode) => existingCode.startsWith(code),
+                      (existingCode) => existingCode.startsWith(code),
                 )) {
                   continue;
                 }
-                if (!answers.containsKey(code)) {
-                  answers[code] = {};
+                if (!importedAnswers.containsKey(code)) {
+                  importedAnswers[code] = {};
                 }
-                answers[code]![question] = answer;
+                if (answer.trim().isNotEmpty) {
+                  importedAnswers[code]![question] = answer;
+                }
                 if (!newCodes.any(
-                  (existingCode) => existingCode.startsWith(code),
+                      (existingCode) => existingCode.startsWith(code),
                 )) {
                   newCodes.add(code);
                 }
@@ -292,11 +286,14 @@ class CreateCodePageState extends State<CreateCodePage> {
             }
           }
         }
-
         if (!mounted) return;
-
         setState(() {
           codes.addAll(newCodes);
+          for (String code in importedAnswers.keys) {
+            if (importedAnswers[code]!.isNotEmpty) {
+              answers[code] = importedAnswers[code]!;
+            }
+          }
           selected = List<bool>.filled(codes.length, false);
         });
         _saveCode();

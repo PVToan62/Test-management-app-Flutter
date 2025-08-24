@@ -48,8 +48,11 @@ class CreateAnswerPageState extends State<CreateAnswerPage> {
     for (int i = 1; i <= widget.numberOfQuestions; i++) {
       String key = '${widget.test}_${widget.code}_answer_$i';
       String? savedAnswer = prefs.getString(key);
-      initializedAnswers[i] =
-          savedAnswer ?? widget.answers[widget.code]?[i.toString()] ?? '';
+      if (savedAnswer != null) {
+        initializedAnswers[i] = savedAnswer;
+      } else {
+        initializedAnswers[i] = widget.answers[widget.code]?[i.toString()] ?? '';
+      }
     }
     setState(() {
       answers = initializedAnswers;
@@ -77,6 +80,7 @@ class CreateAnswerPageState extends State<CreateAnswerPage> {
         await prefs.remove(key);
       }
     }
+    await _updateGlobalAnswers();
     showToast(message: 'Đáp án cho mã đề ${widget.code} đã được lưu!');
     setState(() {
       isModified = false;
@@ -85,7 +89,6 @@ class CreateAnswerPageState extends State<CreateAnswerPage> {
 
   Future<void> _updateGlobalAnswers() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     String? existing = prefs.getString('answers_${widget.test}');
     Map<String, Map<String, String>> allAnswers = {};
     if (existing != null) {
@@ -95,9 +98,14 @@ class CreateAnswerPageState extends State<CreateAnswerPage> {
         ).map((k, v) => MapEntry(k, Map<String, String>.from(v))),
       );
     }
-
-    allAnswers[widget.code] = answers.map((k, v) => MapEntry(k.toString(), v));
-
+    Map<String, String> currentCodeAnswers = {};
+    for (int questionNumber in answers.keys) {
+      String answer = answers[questionNumber] ?? '';
+      if (answer.trim().isNotEmpty) {
+        currentCodeAnswers[questionNumber.toString()] = answer;
+      }
+    }
+    allAnswers[widget.code] = currentCodeAnswers;
     await prefs.setString('answers_${widget.test}', jsonEncode(allAnswers));
   }
 
@@ -142,7 +150,6 @@ class CreateAnswerPageState extends State<CreateAnswerPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     _saveAnswers();
-                    _updateGlobalAnswers();
                     _saveImage();
                     Navigator.of(context).pop();
                     Navigator.of(context).pop();
@@ -222,7 +229,6 @@ class CreateAnswerPageState extends State<CreateAnswerPage> {
                   _pickImage();
                 } else {
                   _saveAnswers();
-                  _updateGlobalAnswers();
                   _saveImage();
                 }
               },
